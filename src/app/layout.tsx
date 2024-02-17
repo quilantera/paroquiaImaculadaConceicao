@@ -26,13 +26,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
-     <head>
-        <meta property="og:image" content="./logo.jpg" />
-        <meta property="og:image:type" content="image/png" />
-        <meta property="og:image:width" content="200" />
-        <meta property="og:image:height" content="200" />
-      </head>
-
       <body className={`${signika.variable} ${inter.variable} font-sans`}>{children}</body>
     </html>
   );
