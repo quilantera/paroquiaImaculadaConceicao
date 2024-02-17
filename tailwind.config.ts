@@ -8,11 +8,26 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      fontFamily: {
+        san: 'var(--font-signika)',
+        alt: 'var(--font-inter)',
       },
+    },
+    screens: {
+      '2xl': {'min': '1535px'},
+      // => @media (min-width: 1535px) { ... }
+
+      'xl': {'min': '1279px'},
+      // => @media (min-width: 1279px) { ... }
+
+      'lg': {'max': '1023px'},
+      // => @media (max-width: 1023px) { ... }
+
+      'md': {'max': '767px'},
+      // => @media (max-width: 767px) { ... }
+
+      'sm': {'max': '639px'},
+      // => @media (max-width: 639px) { ... }
     },
   },
   plugins: [],
