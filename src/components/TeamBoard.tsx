@@ -180,7 +180,7 @@ export function TeamBoard({ teamMembersProps }: TeamBoardProps) {
             <TeamCard
               id={member.id}
               key={member.id}
-              photoUrl={member.photoUrl}
+              photoUrl={"https://cdn-icons-png.flaticon.com/512/6073/6073873.png"}
               name={member.name}
               age={member.age || 20}
               lastTeam={member.lastTeam}
