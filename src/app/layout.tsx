@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Signika } from "next/font/google";
+import { Inter, Signika, Poppins } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const inter = Poppins({
   subsets:["latin"],
   weight: ["300","400","500","600",'700'],
   style: "normal",
@@ -26,7 +26,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
-      <body className={`${signika.variable} ${inter.variable} font-sans`}>{children}</body>
+      <body className={`${signika.variable} ${inter.variable} font-sans min-h-screen`}>{children}</body>
     </html>
   );
 }
