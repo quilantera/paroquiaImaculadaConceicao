@@ -54,7 +54,7 @@ export function TeamBoard({ teamMembersProps }: TeamBoardProps) {
   const [showSummary, setShowSummary] = useState(false);
 
   const filteredMembers = teamMembers.filter(member => {
-    const matchesTeam = selectedTeam ? member.lastTeam === selectedTeam : true;
+    const matchesTeam = selectedTeam ? member.currentTeam === selectedTeam : true;
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTeam && matchesSearch;
   });
@@ -68,10 +68,12 @@ export function TeamBoard({ teamMembersProps }: TeamBoardProps) {
   };
 
   const assignTeamAutomatically = () => {
+    const validTeams = [ 'Alegria', 'Animação', 'Compras', 'Café/Cozinha', 'Liturgia', 
+  'Secretaria', 'Trânsito', 'Visitação', 'Ordem/Patrimonio']
     let teamAssignmentCountAux = 0;
     const auxTeamMembers = teamMembers.map(member => {
       if (member.currentTeam) return member; 
-      const newTeam = availableTeams[teamAssignmentCountAux]; // Obtem a equipe de forma circular
+      const newTeam = validTeams[teamAssignmentCountAux]; // Obtem a equipe de forma circular
       teamAssignmentCountAux = (teamAssignmentCountAux + 1) % availableTeams.length; // Incrementa e reseta
       return { ...member, currentTeam: newTeam };
     });
@@ -106,9 +108,9 @@ export function TeamBoard({ teamMembersProps }: TeamBoardProps) {
     // Criando uma aba para cada equipe
     Object.entries(groupedByTeam).forEach(([teamName, members]) => {
       const sheetData = [
-        ['ID', 'Nome', 'Idade', 'Celular', 'Posição', 'Última Equipe'], // Cabeçalho
+        ['foto', 'Nome', 'Idade', 'Celular', 'Posição', 'Última Equipe'], // Cabeçalho
         ...members.map(member => [
-          member.id,
+          member.photoUrl || "N/A",
           member.name,
           member.age || 'N/A',
           member.cel || 'N/A',
@@ -171,7 +173,7 @@ export function TeamBoard({ teamMembersProps }: TeamBoardProps) {
         setSearchTerm={setSearchTerm}
         selectedTeam={selectedTeam}
         setSelectedTeam={setSelectedTeam}
-        uniqueTeams={[]}
+        uniqueTeams={availableTeams}
       />
 
       <div className="md:grid sm:flex sm:flex-col sm:flex-wrap sm:items-center md:grid-cols-3 flex flex-wrap justify-between gap-3">
