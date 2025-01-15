@@ -1,10 +1,11 @@
 "use client";
-// TeamBoard.tsx
 import { useState } from 'react';
 import { TeamCard } from './TeamCard';
 import { Filters } from './Filters';
 import { TeamSummaryTable } from './TeamSummaryTable';
 import MembersJson from "@/utils/teamMembers.json";
+import * as XLSX from 'xlsx';
+
 export interface TeamMember {
   id: number;
   photoUrl: string;
@@ -15,18 +16,11 @@ export interface TeamMember {
   lastTeam: string;
   currentTeam?: string;
 }
-interface TeamBoardProps{
+
+interface TeamBoardProps {
   teamMembersProps?: TeamMember[] | undefined | null;
 }
-// Lista de integrantes fictícios
-const teamMembersJson: TeamMember[] = [
-  { id: 1, photoUrl: 'https://via.placeholder.com/150', name: 'Maria Silva', position:"Primo",age: 28, lastTeam: 'Encontrista' },
-  { id: 2, photoUrl: 'https://via.placeholder.com/150', name: 'João Santos',position:"Primo", age: 32, lastTeam: 'Encontrista' },
-  { id: 3, photoUrl: 'https://via.placeholder.com/150', name: 'Ana Costa', position:"Primo", age: 25, lastTeam: 'Encontrista' },
-  // Outros membros...
-];
 
-// Equipes disponíveis e suas cores
 const availableTeams = [
   'Pilotos', 'Alegria', 'Animação', 'Circulo Verde', 'Circulo Vermelho', 'Circulo Amarelo', 
   'Circulo Azul', 'Circulo Roxo', 'Compras', 'Café/Cozinha', 'Liturgia', 'Sala', 
@@ -52,24 +46,19 @@ const teamColors: { [key: string]: string } = {
   'Ordem/Patrimonio': 'border-fuchsia-500',
 };
 
-export function TeamBoard({teamMembersProps}:TeamBoardProps) {
-  console.log(teamMembersProps);
-  const teamMembersJsonTeste:TeamMember[] = MembersJson;
+export function TeamBoard({ teamMembersProps }: TeamBoardProps) {
+  const teamMembersJsonTeste: TeamMember[] = MembersJson;
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(teamMembersJsonTeste);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
 
- // const uniqueTeams = Array.from(new Set(teamMembers.map(member => member.lastTeam)));
-
-  // Filtrando membros
   const filteredMembers = teamMembers.filter(member => {
     const matchesTeam = selectedTeam ? member.lastTeam === selectedTeam : true;
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTeam && matchesSearch;
   });
 
-  // Função para atribuir equipe a um membro
   const handleTeamAssignment = (memberId: number, team: string) => {
     setTeamMembers(prev => 
       prev.map(member =>
@@ -79,24 +68,70 @@ export function TeamBoard({teamMembersProps}:TeamBoardProps) {
   };
 
   const assignTeamAutomatically = () => {
-    let teamAssignmentCountAux = 1;
+    let teamAssignmentCountAux = 0;
     const auxTeamMembers = teamMembers.map(member => {
       if (member.currentTeam) return member; 
       const newTeam = availableTeams[teamAssignmentCountAux]; // Obtem a equipe de forma circular
-      teamAssignmentCountAux ++;
-      if(teamAssignmentCountAux == availableTeams.length){
-        teamAssignmentCountAux = 1; // Reseta o contador para a próxima equipe
-      }
+      teamAssignmentCountAux = (teamAssignmentCountAux + 1) % availableTeams.length; // Incrementa e reseta
       return { ...member, currentTeam: newTeam };
     });
     setTeamMembers(auxTeamMembers);
   };
-  const teamCount = teamMembers.reduce((acc, member) => {
-    const team = member.currentTeam || 'Sem Equipe';
-    acc[team] = (acc[team] || 0) + 1;
-    return acc;
-  }, {} as { [team: string]: number });
 
+  const downloadTeamsAsExcel = () => {
+    // Verificando se existem membros para exportar
+    if (!Array.isArray(teamMembers) || teamMembers.length === 0) {
+      console.error('Nenhum membro encontrado para exportação.');
+      return;
+    }
+  
+    // Agrupando os membros por equipe
+    const groupedByTeam: { [key: string]: TeamMember[] } = teamMembers.reduce(
+      (acc: Record<string, TeamMember[]>, member) => {
+        const team = member.currentTeam || 'Sem Equipe';
+        if (!acc[team]) acc[team] = [];
+        acc[team].push(member);
+        return acc;
+      },
+      {}
+    );
+  
+    // Criando um novo workbook
+    const workbook = XLSX.utils.book_new();
+  
+    // Função para sanitizar nomes de abas
+    const sanitizeSheetName = (name: string): string =>
+      name.replace(/[\\/:?*[\]]/g, '_').substring(0, 31);
+  
+    // Criando uma aba para cada equipe
+    Object.entries(groupedByTeam).forEach(([teamName, members]) => {
+      const sheetData = [
+        ['ID', 'Nome', 'Idade', 'Celular', 'Posição', 'Última Equipe'], // Cabeçalho
+        ...members.map(member => [
+          member.id,
+          member.name,
+          member.age || 'N/A',
+          member.cel || 'N/A',
+          member.position,
+          member.lastTeam,
+        ]),
+      ];
+  
+      const worksheet = XLSX.utils.aoa_to_sheet(sheetData); // Transformando os dados em planilha
+      XLSX.utils.book_append_sheet(workbook, worksheet, sanitizeSheetName(teamName)); // Adicionando a aba ao workbook
+    });
+  
+    // Nome personalizado para o arquivo Excel
+    const fileName = `teams_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  
+    // Salvando o arquivo Excel
+    try {
+      XLSX.writeFile(workbook, fileName);
+      console.log(`Arquivo "${fileName}" exportado com sucesso!`);
+    } catch (error) {
+      console.error('Erro ao salvar o arquivo Excel:', error);
+    }
+  };
   
 
   return (
@@ -113,10 +148,20 @@ export function TeamBoard({teamMembersProps}:TeamBoardProps) {
       >
         {showSummary ? 'Ocultar Resumo' : 'Mostrar Resumo'}
       </button>
-      
+      <button
+        className="px-4 py-2 bg-indigo-500 text-white rounded-lg mt-4"
+        onClick={downloadTeamsAsExcel}
+      >
+        Baixar Equipes
+      </button>
+
       {showSummary && (
         <TeamSummaryTable
-          teamCount={teamCount}
+          teamCount={teamMembers.reduce((acc, member) => {
+            const team = member.currentTeam || 'Sem Equipe';
+            acc[team] = (acc[team] || 0) + 1;
+            return acc;
+          }, {} as { [team: string]: number })}
           onClose={() => setShowSummary(false)}
         />
       )}
@@ -128,22 +173,23 @@ export function TeamBoard({teamMembersProps}:TeamBoardProps) {
         setSelectedTeam={setSelectedTeam}
         uniqueTeams={[]}
       />
-      <div className="md:grid sm:grid-cols-2 md:grid-cols-3 flex flex-wrap justify-between gap-3">
+
+      <div className="md:grid sm:flex sm:flex-col sm:flex-wrap sm:items-center md:grid-cols-3 flex flex-wrap justify-between gap-3">
         {filteredMembers.length > 0 ? (
           filteredMembers.map((member) => (
             <TeamCard
               id={member.id}
-              key={member.id} // Usa id único para a chave
+              key={member.id}
               photoUrl={member.photoUrl}
               name={member.name}
-              age={member.age||20}
+              age={member.age || 20}
               lastTeam={member.lastTeam}
               currentTeam={member.currentTeam || ''}
               availableTeams={availableTeams}
               onAssignTeam={handleTeamAssignment}
               teamColor={teamColors[member.currentTeam || ''] || ''} 
-              position={member.position|| "Primo"}
-              />
+              position={member.position || "Primo"}
+            />
           ))
         ) : (
           <p className="text-center text-gray-500">Nenhum integrante encontrado.</p>
