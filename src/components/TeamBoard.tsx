@@ -68,10 +68,14 @@ export function TeamBoard({ teamMembersProps }: TeamBoardProps) {
   };
 
   const assignTeamAutomatically = () => {
+    const validTeams = availableTeams.filter(
+      team => !['Pilotos', 'Circulo Verde', 'Circulo Vermelho', 'Circulo Amarelo', 
+        'Circulo Azul', 'Circulo Roxo','Sala'].includes(team.toLowerCase())
+    );
     let teamAssignmentCountAux = 0;
     const auxTeamMembers = teamMembers.map(member => {
       if (member.currentTeam) return member; 
-      const newTeam = availableTeams[teamAssignmentCountAux]; // Obtem a equipe de forma circular
+      const newTeam = validTeams[teamAssignmentCountAux]; // Obtem a equipe de forma circular
       teamAssignmentCountAux = (teamAssignmentCountAux + 1) % availableTeams.length; // Incrementa e reseta
       return { ...member, currentTeam: newTeam };
     });
