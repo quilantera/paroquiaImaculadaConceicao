@@ -20,11 +20,11 @@ export default function EJC() {
      
         {/* Informações e vídeo */}
         <div className="flex flex-col w-2/5 gap-3  md:w-full md:justify-center md:items-center  ">
-          <h1 className=" font-semibold text-5xl md:font-alt  animate-fade-in-left font-alt md:text-3xl md:text-center">
+          <h1 className=" font-bold text-5xl md:font-alt animate-fade-in-left font-alt md:text-3xl md:text-center">
           ENCONTRO DE JOVENS COM CRISTO 2024
           </h1>
-          <h3 className="font-semibold text-xl animate-fade-in-left md:text-base md:text-center ">Paróquia Imaculada Conceição - jd Dracena</h3>
-           <h2 className=" font-sans mt-10 hidden opacity-0 md:block animate-fade-in-left3 font-bold text-4xl md:text-2xl text-end px-10 md:px-4 "> DIAS 27 E 28 DE JULHO</h2>
+          <h3 className="font-semibold text-xl  animate-fade-in-left md:text-base md:text-center ">Paróquia Imaculada Conceição - jd Dracena</h3>
+           <h2 className=" font-sans mt-10 hidden  opacity-0 md:block animate-fade-in-left3 font-bold text-4xl md:text-2xl text-end px-10 md:px-4 "> DIAS 27 E 28 DE JULHO</h2>
           {/* Corrigindo a tag do vídeo */}
           <a
         href="https://forms.gle/Q6HrvxWDdxWn9h2n8"
